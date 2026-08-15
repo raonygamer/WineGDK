@@ -19,6 +19,13 @@
 
 #include "XTaskQueue.h"
 
+static const GUID IID_TaskQueuePortImpl =
+    { 0x4529CADF, 0x1BA0, 0x4038, { 0xA8, 0x54, 0x2C, 0x0C, 0xA2, 0x63, 0x96, 0xCB } };
+static const GUID IID_TaskQueueImpl =
+    { 0xD63140D8, 0x9A27, 0x4951, { 0xB4, 0x46, 0xFB, 0x86, 0x39, 0x49, 0x0A, 0x9B } };
+static const GUID IID_TaskQueuePortContextImpl =
+    { 0xAFAF0302, 0xAEBB, 0x491A, { 0x94, 0x6F, 0xBF, 0xB2, 0x83, 0x49, 0x6E, 0x7A } };
+
 WINE_DEFAULT_DEBUG_CHANNEL(gdkc);
 
 inline ITaskQueue* GetQueue(XTaskQueueHandle handle)
@@ -163,7 +170,7 @@ TaskQueuePortImpl::QueryInterface(
     if ( iid == __uuidof( IUnknown ) ||
          iid == __uuidof( IInspectable ) ||
          iid == __uuidof( IAgileObject ) ||
-         iid == __uuidof( TaskQueuePortImpl ) )
+         iid == IID_TaskQueuePortImpl )
     {
         AddRef();
         *out = static_cast<TaskQueuePortImpl *>(this);
@@ -1232,7 +1239,7 @@ TaskQueueImpl::QueryInterface(
     if ( iid == __uuidof( IUnknown ) ||
          iid == __uuidof( IInspectable ) ||
          iid == __uuidof( IAgileObject ) ||
-         iid == __uuidof( TaskQueueImpl ) )
+         iid == IID_TaskQueueImpl )
     {
         AddRef();
         *out = static_cast<TaskQueueImpl *>(this);
@@ -1281,8 +1288,8 @@ HRESULT TaskQueueImpl::Initialize(
     work->GetHandle()->m_queue = this;
     completion->GetHandle()->m_queue = this;
     
-    RETURN_IF_FAILED(work->QueryInterface(__uuidof( TaskQueuePortImpl ), (void**)&m_work.Port));
-    RETURN_IF_FAILED(completion->QueryInterface(__uuidof( TaskQueuePortImpl ), (void**)&m_completion.Port));
+    RETURN_IF_FAILED(work->QueryInterface(IID_TaskQueuePortImpl, (void**)&m_work.Port));
+    RETURN_IF_FAILED(completion->QueryInterface(IID_TaskQueuePortImpl, (void**)&m_completion.Port));
 
     RETURN_IF_FAILED(m_work.Port->Attach(&m_work));
     RETURN_IF_FAILED(m_completion.Port->Attach(&m_completion));
@@ -1546,7 +1553,7 @@ TaskQueuePortContextImpl::QueryInterface(
     if ( iid == __uuidof( IUnknown ) ||
          iid == __uuidof( IInspectable ) ||
          iid == __uuidof( IAgileObject ) ||
-         iid == __uuidof( TaskQueuePortContextImpl ) )
+         iid == IID_TaskQueuePortContextImpl )
     {
         AddRef();
         *out = static_cast<TaskQueuePortContextImpl *>(this);

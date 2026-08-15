@@ -172,18 +172,6 @@ IPCResponseHandler::Invoke( IXodusIPCPacket *response )
     return m_callback( m_context, response );
 }
 
-
-/**
- * MsaTokenResponse: Wraps Msa Token response packets sent by Xodus
- */
-MsaTokenResponse::MsaTokenResponse( 
-    HSTRING token,
-    ABI::Windows::Foundation::DateTime expiry )
-: Expiry(expiry)
-{
-    WindowsDuplicateString( token, &Token );
-}
-
 HRESULT WINAPI
 MsaTokenResponse::QueryInterface( REFIID iid, void **out ) noexcept
 {
@@ -207,6 +195,17 @@ MsaTokenResponse::QueryInterface( REFIID iid, void **out ) noexcept
     return E_NOINTERFACE;
 }
 
+/**
+ * MsaTokenResponse: Wraps Msa Token response packets sent by Xodus
+ */
+MsaTokenResponse::MsaTokenResponse( 
+    HSTRING token,
+    ABI::Windows::Foundation::DateTime expiry )
+: Expiry(expiry)
+{
+    WindowsDuplicateString( token, &Token );
+}
+
 ULONG WINAPI 
 MsaTokenResponse::AddRef() noexcept
 {
@@ -223,7 +222,7 @@ MsaTokenResponse::Release() noexcept
 
     if ( !curr )
     {
-        WindowsDeleteString( Token );
+        if (token) free( const_cast<char *>(token) );
         delete this;
     }
 
@@ -231,10 +230,10 @@ MsaTokenResponse::Release() noexcept
 }
 
 HRESULT WINAPI
-MsaTokenResponse::get_Token( HSTRING *out )
+MsaTokenResponse::get_Token( const char **out )
 {
-    TRACE( "iface %p, out %p\n", this, out );
-    WindowsDuplicateString( Token, out );
+    TRACE( "iface %p, out %p.\n", this, out );
+    *out = strdup( token );
     return S_OK;
 }
 

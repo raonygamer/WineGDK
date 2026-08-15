@@ -49,6 +49,7 @@
 
 #include <xgameerr.h>
 #include <xsystem.h>
+#include <xgame.h>
 #include <xgameruntimefeature.h>
 #include <xnetworking.h>
 #include <xuser.h>
@@ -58,21 +59,30 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 #include "wine/unixlib.h"
+
 #ifdef __cplusplus
 }
 #endif
+
 #include "wine/debug.h"
 
 #define WIDL_using_Windows_Foundation
 #define WIDL_using_Windows_Foundation_Collections
 #include "windows.foundation.h"
+#define WIDL_using_Windows_Data_Json
+#include "windows.data.json.h"
 #define WIDL_using_Windows_Globalization
 #include "windows.globalization.h"
 #define WIDL_using_Windows_System_Profile
 #include "windows.system.profile.h"
+#define WIDL_using_Windows_Data_Json
+#include "windows.data.json.h"
 #define WIDL_using_Xodus
 #include "xodusprovider.h"
+
+#include "userprovider.h"
 
 #define RETURN_HR(hr)                                           TRACE("Returning HR %#lx\n", hr); return(hr)
 #define RETURN_LAST_ERROR()                                     return HRESULT_FROM_WIN32(GetLastError())
@@ -94,33 +104,54 @@ extern "C" {
 
 #define FAIL_FAST_IF_FAILED(hr)                                 do { HRESULT __hrRet = hr; if (FAILED(__hrRet)) { FAIL_FAST_MSG("%s 0x%#lx", #hr, __hrRet); }} while (0)
 
-#define POLL_BUFFER_SIZE 2048
+#define POLL_BUFFER_SIZE 0x10008 /* UINT16 payload plus IPC header */
 #define XODUS_SOCKET_SUFFIX "xodus.sock"
 #define IPC_REQUEST_TIMEOUT_MS 5000
-#define XODUS_INTEROP 0
+#define XODUS_INTEROP 1
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+extern BOOLEAN initializeCalled;
+
+extern char *msaAppId;
+extern UINT32 titleId;
+extern BOOLEAN fullTrust;
+
 extern IXThreadingImpl *x_threading_impl;
 extern IXGameRuntimeFeatureImpl *x_game_runtime_feature;
 extern IXSystemImpl *x_system;
 extern IXSystemAnalyticsImpl *x_system_analytics;
 extern IXNetworkingImpl *x_networking;
-extern IXUserImpl *x_user;
+extern IXGameImpl *x_game;
+extern IXUserImpl6 *x_user;
+extern IXUserDeviceImpl *x_user_device;
+
+extern unixlib_handle_t unixhandle;
+
 #ifdef __cplusplus
 }
 #endif
 
 #ifdef __cplusplus
-extern ABI::Xodus::IIPCLayer *xodus_ipclayer;
-extern ABI::Xodus::IXodusService *xodus_service;
-extern ABI::Xodus::IXodusXMLBuilder *xodus_xml_builder;
+
+extern "C"
+{
+    extern ABI::Xodus::IIPCLayer *xodus_ipclayer;
+    extern ABI::Xodus::IXodusService *xodus_service;
+    extern ABI::Xodus::IXodusXMLBuilder *xodus_xml_builder;
+}
+
 #else
+
 extern IIPCLayer *xodus_ipclayer;
 extern IXodusService *xodus_service;
 extern IXodusXMLBuilder *xodus_xml_builder;
+
 #endif
+
+EXTERN_C HRESULT WINAPI QueryApiImpl( const GUID *runtimeClassId, REFIID interfaceId, void **out );
 
 typedef struct _INITIALIZE_OPTIONS
 {
@@ -142,31 +173,7 @@ enum unix_funcs
     send_frame
 };
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-extern unixlib_module_t unixlib;
-extern unixlib_handle_t unixhandle;
-#ifdef __cplusplus
-}
-#endif
-
-extern LPCSTR msaAppId;
-extern UINT32 titleId;
-extern BOOLEAN fullTrust;
-
 typedef HRESULT (WINAPI *async_operation_callback)( IUnknown *invoker, PVOID param, PROPVARIANT *result );
-
-// Deference is for other modules to communicate with eachother through the same binary.
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-HRESULT WINAPI QueryApiImpl( const GUID *runtimeClassId, REFIID interfaceId, void **out );
-
-#ifdef __cplusplus
-}
-#endif
 
 #define DEFINE_ASYNC_COMPLETED_HANDLER( name, iface_type, async_type )                              \
     struct name                                                                                     \
