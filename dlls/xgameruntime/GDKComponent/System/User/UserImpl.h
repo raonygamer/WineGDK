@@ -27,7 +27,7 @@
 
 #include <atomic>
 
-struct IUser : IUnknown
+struct DECLSPEC_UUID("5F280469-FB5A-44AA-9F14-D77C7C90A5DC") IUser : IUnknown
 {
     virtual HRESULT WINAPI GetMsaToken( HSTRING *token ) = 0;
 };

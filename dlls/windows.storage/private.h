@@ -57,9 +57,15 @@
 #define WINDOWS_TICK 10000000
 #define SEC_TO_UNIX_EPOCH 11644473600LL
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 extern IActivationFactory *random_access_stream_reference_factory;
 extern IActivationFactory *memory_stream_activation_factory;
 extern IActivationFactory *storage_folder_factory;
+#ifdef __cplusplus
+}
+#endif
 
 struct async_operation_iids
 {

@@ -1253,6 +1253,32 @@ static void build_dlltool_import_lib( const char *lib_name, DLLSPEC *spec, struc
         fclose( output_file );
     }
 
+    if (target.platform == PLATFORM_WINDOWS && !strendswith( lib_name, ".delay.a" ))
+    {
+        const char *import_lib = files.count ? make_temp_file( "implib", ".lib" ) : lib_name;
+
+        if (files.count) unlink( import_lib );
+        args = find_link_tool();
+        strarray_add( &args, "/lib" );
+        strarray_add( &args, strmake( "/machine:%s", get_target_machine() ));
+        strarray_add( &args, strmake( "/out:%s", import_lib ));
+        strarray_add( &args, strmake( "/def:%s", def_file ));
+        if (native_def_file) strarray_add( &args, strmake( "/defArm64Native:%s", native_def_file ));
+        spawn( args );
+
+        if (files.count)
+        {
+            args = find_link_tool();
+            strarray_add( &args, "/lib" );
+            strarray_add( &args, strmake( "/machine:%s", get_target_machine() ));
+            strarray_add( &args, strmake( "/out:%s", lib_name ));
+            strarray_add( &args, import_lib );
+            strarray_addall( &args, files );
+            spawn( args );
+        }
+        return;
+    }
+
     args = find_tool( "dlltool", NULL );
     strarray_add( &args, "-k" );
     strarray_add( &args, strendswith( lib_name, ".delay.a" ) ? "-y" : "-l" );

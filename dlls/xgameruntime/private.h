@@ -55,7 +55,13 @@
 #include <xasync.h>
 #include <xasyncprovider.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "wine/unixlib.h"
+#ifdef __cplusplus
+}
+#endif
 #include "wine/debug.h"
 
 #define WIDL_using_Windows_Foundation
@@ -93,12 +99,18 @@
 #define IPC_REQUEST_TIMEOUT_MS 5000
 #define XODUS_INTEROP 0
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 extern IXThreadingImpl *x_threading_impl;
 extern IXGameRuntimeFeatureImpl *x_game_runtime_feature;
 extern IXSystemImpl *x_system;
 extern IXSystemAnalyticsImpl *x_system_analytics;
 extern IXNetworkingImpl *x_networking;
 extern IXUserImpl *x_user;
+#ifdef __cplusplus
+}
+#endif
 
 #ifdef __cplusplus
 extern ABI::Xodus::IIPCLayer *xodus_ipclayer;
@@ -130,8 +142,14 @@ enum unix_funcs
     send_frame
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 extern unixlib_module_t unixlib;
 extern unixlib_handle_t unixhandle;
+#ifdef __cplusplus
+}
+#endif
 
 extern LPCSTR msaAppId;
 extern UINT32 titleId;
